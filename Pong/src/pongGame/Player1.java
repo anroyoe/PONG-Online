@@ -37,8 +37,6 @@ public class Player1 extends JFrame {
 		Thread ball = new Thread(b);
 		ball.start();
 		Thread p1 = new Thread(b.p1);
-		Thread p2 = new Thread(b.p2);
-		p2.start();
 		p1.start();
 	}
 	public void paint(Graphics g) {

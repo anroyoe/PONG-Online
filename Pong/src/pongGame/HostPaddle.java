@@ -15,8 +15,7 @@ public class HostPaddle implements Runnable {
 	private int x, y, yDirection, id;
 
 	private Rectangle paddle;
-	private boolean fin = false;
-
+	
 	private int myPort, enemyPort;
 
 	public HostPaddle(int x, int y, int id) {
@@ -42,13 +41,6 @@ public class HostPaddle implements Runnable {
 		return this.paddle;
 	}
 
-	public boolean isFinished() {
-		return this.fin;
-	}
-
-	public void end() {
-		this.fin = true;
-	}
 
 	public void setPorts(int myPort, int enemyPort) {
 		this.myPort = myPort;
@@ -138,11 +130,11 @@ public class HostPaddle implements Runnable {
 
 	@Override
 	public void run() {
-		try {
-			DatagramSocket correos = new DatagramSocket();
-			while (!this.fin) {
+		try (DatagramSocket correos = new DatagramSocket();){
+			while (true) {
 				move();
 				byte y[] = ByteBuffer.allocate(4).putInt(paddle.y).array();
+				//Los mensajes de las palas serán (id,posiciónY[2],0,0,0,0).
 				byte mensaje[]= {(byte)id,y[2],y[3],0,0,0,0};
 				DatagramPacket envio=null;
 				if(id==1) {

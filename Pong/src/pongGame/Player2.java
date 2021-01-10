@@ -6,9 +6,6 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.net.ServerSocket;
-
 import javax.swing.JFrame;
 
 
@@ -38,10 +35,8 @@ public class Player2 extends JFrame{
 		this.addKeyListener(new AL());
 		Thread ball = new Thread(b);
 		ball.start();
-		Thread p1 = new Thread(b.p1);
 		Thread p2 = new Thread(b.p2);
 		p2.start();
-		p1.start();
 	}
 	public void paint(Graphics g) {
 		dbImage = createImage(getWidth(), getHeight());

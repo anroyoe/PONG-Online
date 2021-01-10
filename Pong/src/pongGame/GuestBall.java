@@ -6,7 +6,6 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -14,7 +13,6 @@ import java.util.Random;
 public class GuestBall implements Runnable {
 	private int x, y, xDirection, yDirection;
 
-	private boolean fin = false;
 	Scoreboard score;
 
 	GuestPaddle p1 = new GuestPaddle(10, 25, 1);
@@ -67,8 +65,7 @@ public class GuestBall implements Runnable {
 	}
 
 	public void move() {
-		try {
-			DatagramSocket server = new DatagramSocket(myPort);
+		try (DatagramSocket server = new DatagramSocket(myPort);){
 			byte mensaje[] = new byte[5];
 			DatagramPacket recibo = new DatagramPacket(mensaje, mensaje.length);
 			server.receive(recibo);
@@ -84,26 +81,16 @@ public class GuestBall implements Runnable {
 			e.printStackTrace();
 		}
 	}
-
-	public boolean isFinished() {
-		return fin;
-	}
-
-	public void end() {
-		this.fin = true;
-	}
-
 	public void setPorts(int myPort, int enemyPort) {
 		this.myPort = myPort;
 		this.enemyPort = enemyPort;
-		p1.setPorts(myPort, enemyPort);
 		p2.setPorts(myPort, enemyPort);
 	}
 
 	@Override
 	public void run() {
 		try (DatagramSocket server = new DatagramSocket(myPort); DatagramSocket server2 = new DatagramSocket(62075);) {
-			while (!this.fin) {
+			while (true) {
 				byte mensaje[] = new byte[7];
 				DatagramPacket recibo = new DatagramPacket(mensaje, mensaje.length);
 				server.receive(recibo);

@@ -17,7 +17,6 @@ public class HostBall implements Runnable {
 	// global variables
 	private int x, y, xDirection, yDirection;
 
-	private boolean fin = false;
 	Scoreboard score;
 
 	HostPaddle p1 = new HostPaddle(10, 25, 1);
@@ -46,6 +45,11 @@ public class HostBall implements Runnable {
 
 		// create "ball"
 		ball = new Rectangle(this.x, this.y, 15, 15);
+	}
+
+	public void reset() {
+		ball.x = x;
+		ball.y = y;
 	}
 
 	public void setXDirection(int xDir) {
@@ -77,10 +81,12 @@ public class HostBall implements Runnable {
 		if (ball.x <= 0) {
 			setXDirection(+1);
 			score.pointP2();
+			this.reset();
 		}
 		if (ball.x >= 485) {
 			setXDirection(-1);
 			score.pointP1();
+			this.reset();
 		}
 
 		if (ball.y <= 15) {
@@ -93,29 +99,23 @@ public class HostBall implements Runnable {
 
 	}
 
-	public boolean isFinished() {
-		return fin;
-	}
-
-	public void end() {
-		this.fin = true;
-	}
-
 	public void setPorts(int myPort, int enemyPort) {
 		this.myPort = myPort;
 		this.enemyPort = enemyPort;
 		p1.setPorts(myPort, enemyPort);
-		p2.setPorts(myPort, enemyPort);
 	}
 
 	@Override
 	public void run() {
 		try (DatagramSocket correos = new DatagramSocket(myPort); DatagramSocket server2 = new DatagramSocket(62074);) {
-			while (!this.fin) {
+			while (true) {
 				move();
+				//Hay que convertir los enteros de la posición en bytes.
 				byte x[] = ByteBuffer.allocate(4).putInt(ball.x).array();
 				byte y[] = ByteBuffer.allocate(4).putInt(ball.y).array();
-				byte mensaje[] = { 0, x[2], x[3], y[2], y[3],(byte)score.getP1score(),(byte)score.getP2score() };
+				// Los mensajes de la bola serán (0, posiciónX[2], posiciónY[2], puntuaciónJ1,
+				// puntuaciónJ2).
+				byte mensaje[] = { 0, x[2], x[3], y[2], y[3], (byte) score.getP1score(), (byte) score.getP2score() };
 				DatagramPacket envio = new DatagramPacket(mensaje, mensaje.length, InetAddress.getByName("localhost"),
 						enemyPort);
 				correos.send(envio);
